@@ -27,7 +27,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/HackTheLan.git
+git clone https://github.com/revers3everything/HackTheLan.git
 cd HackTheLan
 
 # Install Python dependencies
