@@ -542,7 +542,7 @@ def main():
 [8]  IPv6 scans
 [9]  Capture NTLM Hashes
 [10] Capture WPA2 Handshake
-[11] Chagen hostname
+[11] Hostname Spoofing
 [12] Bypass NAC with Silent Bridge
 [13] Exit
 """
