@@ -1,7 +1,7 @@
 # HackTheLan 🛠️
 ![alt text](tool.png)
 
-**HackTheLan** is an all-in-one automated offensive toolkit designed for **pentesters and red teamers** who need to perform **on-site LAN/WLAN attacks and network reconnaissance** efficiently. Built mainly with **Python and Scapy**, this tool brings together multiple attack and discovery capabilities in a single interface.
+**HackTheLan** is an all-in-one automated offensive toolkit designed for **pentesters and red teamers** who need to perform **on-site LAN/WLAN attacks and network reconnaissance** efficiently. Built mainly with **Python and Scapy**, this tool brings together multiple attack and discovery capabilities in a single interface. Also this tool include SilentBridge that allow you to bypass NAC controls 802.1x to access to the Network.
 
 ---
 
@@ -36,6 +36,12 @@ sudo apt install python3-scapy
 
 # Install external tool dependencies
 sudo apt install nmap netdiscover macchanger aircrack-ng netexec
+
+# Install silent bridge
+cd silentbridge/
+python3 -m venv myenv
+source myenv/bin/activate
+sudo ./quick-setup
 ```
 
 **Note:** Make sure you have the following tools installed and accessible from your `$PATH`:
@@ -65,6 +71,7 @@ sudo python3 hackthelan.py
 ## What It Does
 
 - **LAN Discovery:** Identify hosts and network devices using tools like `netdiscover`, `nmap`, or `nxc`.
+- **Bypass the NAC / 802.1x EAP:** Use differents attacks that incorporate SilentBridge tool to bypass 802.1x NAC controls
 - **WLAN Attacks:** Capture WPA2 handshakes using `airodump-ng`, deauth packets with Scapy.
 - **MAC/IP Spoofing:** Bypass NAC restrictions and impersonate devices.
 - **ARP/DHCP Spoofing:** Hijack network traffic and perform MiTM.

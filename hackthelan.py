@@ -20,8 +20,8 @@ def print_banner():
 █  ████  ██        ██  ████  ██  ███  ██████  █████  ████  ██  ████████  ████████        ██  ██    █
 █  ████  ██  ████  ███      ███  ████  █████  █████  ████  ██        ██        ██  ████  ██  ███   █
                                                                                                     
-
-                     Hack LAN networks by  @revers3vrything June 2025
+                                    version 2 - July 2025
+                     Hack and Acces to LAN networks by  @revers3vrything
     """
     print(banner)
 
@@ -151,28 +151,29 @@ def mac_spoofing():
         else:
             print("[-] Invalid option. Please try again.")
 
+
 def ip_spoofing():
     while True:
         print("\n--- IP Spoofing ---")
         print("[1] Change the IP address manually")
-        print("[2] Return to main menu")
+        print("[2] Remove manually set IP (flush IP configuration)")
+        print("[3] Return to main menu")
 
-        choice = input("Select an option > ")
+        choice = input("Select an option > ").strip()
 
         if choice == '1':
-            interface = input("Enter the network interface (e.g., eth0, wlan0): ")
-            new_ip = input("Enter the new IP address (e.g., 192.168.1.100): ")
-            mask = input("Enter the subnet mask (e.g., 24): ")
-            gateway = input("Enter the gateway IP address (e.g., 192.168.1.1): ")
+            interface = input("Enter the network interface (e.g., eth0, wlan0): ").strip()
+            new_ip = input("Enter the new IP address (e.g., 192.168.1.100): ").strip()
+            mask = input("Enter the subnet mask (e.g., 24): ").strip()
+            gateway = input("Enter the gateway IP address (e.g., 192.168.1.1): ").strip()
 
-            cidr = mask
-            print(f"\n[+] Changing IP of {interface} to {new_ip}/{cidr} with gateway {gateway}...")
+            print(f"\n[+] Changing IP of {interface} to {new_ip}/{mask} with gateway {gateway}...")
 
             # Remove current IP addresses
             subprocess.run(['sudo', 'ip', 'addr', 'flush', 'dev', interface])
 
             # Set new IP address
-            subprocess.run(['sudo', 'ip', 'addr', 'add', f'{new_ip}/{cidr}', 'dev', interface])
+            subprocess.run(['sudo', 'ip', 'addr', 'add', f'{new_ip}/{mask}', 'dev', interface])
 
             # Bring the interface up
             subprocess.run(['sudo', 'ip', 'link', 'set', interface, 'up'])
@@ -185,6 +186,21 @@ def ip_spoofing():
             break
 
         elif choice == '2':
+            interface = input("Enter the network interface to flush (e.g., eth0, wlan0): ").strip()
+            print(f"\n[+] Flushing all IP addresses from {interface}...")
+
+            # Flush all IP addresses
+            subprocess.run(['sudo', 'ip', 'addr', 'flush', 'dev', interface])
+
+            # Optionally bring the interface down and up to fully reset
+            subprocess.run(['sudo', 'ip', 'link', 'set', interface, 'down'])
+            subprocess.run(['sudo', 'ip', 'link', 'set', interface, 'up'])
+
+            print(f"[+] IP addresses removed for interface {interface}.")
+            subprocess.run(['ip', 'addr', 'show', 'dev', interface])
+            break
+
+        elif choice == '3':
             break
 
         else:
@@ -422,6 +438,96 @@ def wifi_deauth_capture_crack():
 
     print("\n[+] Done.")
 
+def change_hostname():
+    new_hostname = input("Enter the new hostname: ").strip()
+
+    if not new_hostname:
+        print("[!] No hostname provided.")
+        return
+
+    try:
+        # Set new hostname
+        subprocess.run(["hostnamectl", "set-hostname", new_hostname], check=True)
+
+        # Modify /etc/hosts
+        with open("/etc/hosts", "r") as file:
+            hosts_content = file.readlines()
+
+        with open("/etc/hosts", "w") as file:
+            for line in hosts_content:
+                if line.startswith("127.0.1.1"):
+                    file.write(f"127.0.1.1\t{new_hostname}\n")
+                else:
+                    file.write(line)
+
+        print(f"\n[+] Hostname successfully changed to '{new_hostname}'")
+
+        # Show current hostname
+        print("\n[+] Verifying current hostname:\n")
+        subprocess.run(["hostname"])
+
+        # Open /etc/hosts in less
+        print("\n[+] Showing /etc/hosts contents:\n")
+        subprocess.run(["less", "/etc/hosts"])
+
+    except subprocess.CalledProcessError as e:
+        print(f"[!] Command failed: {e}")
+    except Exception as e:
+        print(f"[!] Error: {e}")
+
+def run_silent_bridge():
+    try:
+        target_path = "silentbridge"
+        venv_path = os.path.join(target_path, "myenv", "bin", "activate")
+
+        if not os.path.isdir(target_path):
+            print(f"[!] Directory {target_path} does not exist.")
+            return
+        if not os.path.exists(venv_path):
+            print(f"[!] Virtual environment not found at {venv_path}")
+            return
+
+        print("\n=== SilentBridge Menu ===")
+        print("1. Classic 802.1x Bypass Attack")
+        print("2. Another attack, by default show Help ('./silentbridge -h')")
+        print("0. Exit")
+
+        choice = input("\nSelect an option: ").strip()
+
+        if choice == "1":
+            # Get user input for interface names
+            upstream = input("Enter the name of the --upstream interface (e.g., eth0): ").strip()
+            phy = input("Enter the name of the --phy interface (e.g., eth1): ").strip()
+            sidechannel = input("Enter the name of the --sidechannel interface (e.g., eth3): ").strip()
+
+            command = f"./silentbridge --create-bridge --upstream {upstream} --phy {phy} --sidechannel {sidechannel}"
+            print(f"\n[+] Running: {command}\n")
+
+            subprocess.call([
+                "/bin/bash", "-c",
+                f"cd {target_path} && source myenv/bin/activate && {command}"
+            ])
+
+        elif choice == "2":
+            print(f"\n[+] Launching shell in {target_path} with virtual environment activated.")
+            print("[+] Running './silentbridge -h' inside the shell.")
+            print("[+] Type 'deactivate' to exit the environment, and 'exit' to leave the shell.\n")
+
+            subprocess.call([
+                "/bin/bash", "-c",
+                f"cd {target_path} && source myenv/bin/activate && ./silentbridge -h; exec /bin/bash"
+            ])
+
+        elif choice == "0":
+            print("[*] Exiting.")
+            return
+
+        else:
+            print("[!] Invalid option selected.")
+
+    except Exception as e:
+        print(f"[!] An error occurred: {e}")
+
 
 
 def main():
@@ -436,7 +542,9 @@ def main():
 [8]  IPv6 scans
 [9]  Capture NTLM Hashes
 [10] Capture WPA2 Handshake
-[11] Exit
+[11] Chagen hostname
+[12] Bypass NAC with Silent Bridge
+[13] Exit
 """
 
     while True:
@@ -465,6 +573,10 @@ def main():
         elif choice == '10':
             wifi_deauth_capture_crack()
         elif choice == '11':
+            change_hostname()
+        elif choice == '12':
+            run_silent_bridge()
+        elif choice == '13':
             print("Exiting NetAccess. Goodbye!")
             sys.exit(0)
         else:
